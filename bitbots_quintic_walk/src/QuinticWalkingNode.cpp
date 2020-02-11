@@ -38,7 +38,7 @@ QuinticWalkingNode::QuinticWalkingNode()
     _subCmdVel = _nh.subscribe("cmd_vel", 1, &QuinticWalkingNode::cmdVelCb, this,
                                ros::TransportHints().tcpNoDelay());
     _subHeadPos =
-        _nh.subscribe("head_pos", 1, &QuinticWalkingNode::headPosCb, this,
+        _nh.subscribe("head_motor_goals", 1, &QuinticWalkingNode::headPosCb, this,
                       ros::TransportHints().tcpNoDelay());
     _subRobState =
         _nh.subscribe("robot_state", 1, &QuinticWalkingNode::robStateCb, this,
@@ -302,10 +302,10 @@ void QuinticWalkingNode::cmdVelCb(const geometry_msgs::Twist msg) {
     }
 }
 
-void QuinticWalkingNode::headPosCb(const sensor_msgs::JointState msg) {
-    // we use only 2 values from the JointState position messages, position[0, 1] as pitch, yaw in rad
-    _headPos[0] = msg.position[0];
-    _headPos[1] = msg.position[1];
+void QuinticWalkingNode::headPosCb(const bitbots_msgs::JointCommand msg) {
+    // we use only 2 values from the JointCommand position messages, positions[0, 1] as yaw, pitch in rad
+    _headPos[0] = msg.positions[1];
+    _headPos[1] = msg.positions[0];
 }
 
 void QuinticWalkingNode::imuCb(const sensor_msgs::Imu msg) {

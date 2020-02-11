@@ -20,7 +20,6 @@ https://github.com/Rhoban/model/
 #include <std_msgs/String.h>
 #include <std_msgs/Float64.h>
 #include <std_msgs/Char.h>
-#include <sensor_msgs/JointState.h>
 #include <sensor_msgs/Imu.h>
 #include <nav_msgs/Odometry.h>
 #include <std_srvs/SetBool.h>
@@ -133,7 +132,7 @@ public:
 
     void cmdVelCb(geometry_msgs::Twist msg);
 
-    void headPosCb(sensor_msgs::JointState msg);
+    void headPosCb(bitbots_msgs::JointCommand msg);
 
     void imuCb(sensor_msgs::Imu msg);
 
