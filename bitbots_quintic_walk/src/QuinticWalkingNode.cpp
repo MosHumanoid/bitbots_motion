@@ -560,28 +560,42 @@ void QuinticWalkingNode::publishOdometry() {
     double x;
     double y;
     double yaw;
-    if (_walkEngine.getFootstep().isLeftSupport()) {
-        x = _walkEngine.getFootstep().getLeft()[0];
-        y = _walkEngine.getFootstep().getLeft()[1] + _params.footDistance / 2;
-        yaw = _walkEngine.getFootstep().getLeft()[2];
-    } else {
-        x = _walkEngine.getFootstep().getRight()[0];
-        y = _walkEngine.getFootstep().getRight()[1] + _params.footDistance / 2;
-        yaw = _walkEngine.getFootstep().getRight()[2];
-    }
+    /* if (_walkEngine.getFootstep().isLeftSupport()) { */
+    /*     x = _walkEngine.getFootstep().getLeft()[0]; */
+    /*     y = _walkEngine.getFootstep().getLeft()[1] + _params.footDistance / 2; */
+    /*     yaw = _walkEngine.getFootstep().getLeft()[2]; */
+    /* } else { */
+    /*     x = _walkEngine.getFootstep().getRight()[0]; */
+    /*     y = _walkEngine.getFootstep().getRight()[1] + _params.footDistance / 2; */
+    /*     yaw = _walkEngine.getFootstep().getRight()[2]; */
+    /* } */
 
-    tf::Transform supportFootTf;
-    supportFootTf.setOrigin(tf::Vector3{x, y, 0.0});
-    tf::Quaternion supportFootQuat = tf::Quaternion();
-    supportFootQuat.setRPY(0, 0, yaw);
-    supportFootTf.setRotation(supportFootQuat);
-    tf::Transform odom_to_trunk = supportFootTf * tf_support_to_trunk;
-    tf::Vector3 pos = odom_to_trunk.getOrigin();
+    /* tf::Transform supportFootTf; */
+    /* supportFootTf.setOrigin(tf::Vector3{x, y, 0.0}); */
+    /* tf::Quaternion supportFootQuat = tf::Quaternion(); */
+    /* supportFootQuat.setRPY(0, 0, yaw); */
+    /* supportFootTf.setRotation(supportFootQuat); */
+    /* tf::Transform odom_to_trunk = supportFootTf * tf_support_to_trunk; */
+    /* tf::Vector3 pos = odom_to_trunk.getOrigin(); */
+    /* geometry_msgs::Quaternion quat_msg; */
+
+    /* tf::quaternionTFToMsg(odom_to_trunk.getRotation().normalize(), quat_msg); */
+
+    tf::Vector3 pos;
     geometry_msgs::Quaternion quat_msg;
 
-    tf::quaternionTFToMsg(odom_to_trunk.getRotation().normalize(), quat_msg);
+    pos[0] = _real_odometry[0];
+    pos[1] = _real_odometry[1];
+    pos[2] = _real_odometry[2];
 
     ros::Time current_time = ros::Time::now();
+    Eigen::Quaterniond q = Eigen::AngleAxisd(_imu_angle[0], Eigen::Vector3d::UnitX()) *  // roll
+                           Eigen::AngleAxisd(_imu_angle[1], Eigen::Vector3d::UnitY()) *  // pitch
+                           Eigen::AngleAxisd(_imu_angle[2], Eigen::Vector3d::UnitZ());   // yaw
+    quat_msg.w = q.w();
+    quat_msg.x = q.x();
+    quat_msg.y = q.y();
+    quat_msg.z = q.z();
 
     if (_publishOdomTF) {
         _odom_trans = geometry_msgs::TransformStamped();
@@ -670,8 +684,6 @@ QuinticWalkingNode::publishDebug(tf::Transform &trunk_to_support_foot_goal, tf::
     msg.footstep_next.x = _walkEngine.getFootstep().getNext()[0];
     msg.footstep_next.y = _walkEngine.getFootstep().getNext()[1];
     msg.footstep_next.z = _walkEngine.getFootstep().getNext()[2];
-
-
 
     // engine output
     geometry_msgs::Pose pose_msg;
@@ -1109,7 +1121,7 @@ void QuinticWalkingNode::GetDataFromDsp() {
 
   _real_body_pos = _dsp_handler->GetBodyPose();
 
-  _imu_angle = _dsp_handler->GetImuAngle();
+  _imu_angle = _dsp_handler->GetImuAngle(); // in order of roll, pitch, yaw
 }
 
 int main(int argc, char **argv) {
